@@ -1,3 +1,16 @@
+# Group Members
+
+| Name         | ID Number                |
+|-----------------|-----------------------|
+| PIYUSH JAJRA       | 2021B4A72969H      |
+| PRAKSHAAL VORA     | 2021B3A72967H      |
+| TANMAY AGARWAL     | 2021B3A73040H      |
+| KUSH DESAI         | 2021B4A73158H      |
+| JAI GUPTA         | 2021B5A73169H       |
+
+---
+<br>
+
 # ⚙️ Setup & Compilation
 
 <br>
