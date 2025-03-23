@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maximal Clique Analysis Report</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); }
+        .chart-card { backdrop-filter: blur(12px); background: rgba(255, 255, 255, 0.9); }
+        .hover-scale { transition: transform 0.2s ease; }
+        .hover-scale:hover { transform: translateY(-2px); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .animate-fadeIn { animation: fadeIn 0.5s ease-out; }
+        .animate-slideInLeft { animation: slideInLeft 0.5s ease-out; }
+        .animate-slideInRight { animation: slideInRight 0.5s ease-out; }
+        .animate-pulse { animation: pulse 2s infinite; }
+        .card-gradient { background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(249, 250, 251, 0.9) 100%); }
+        .glass-effect { backdrop-filter: blur(12px); background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .section-divider { 
+            height: 4px;
+            background: linear-gradient(90deg, transparent, rgba(79, 70, 229, 0.5), transparent);
+            margin: 3rem auto;
+            width: 80%;
+            border-radius: 2px;
+        }
+        .tab-button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            background-color: #4f46e5;
+            color: white;
+        }
+        .tooltip {
+            position: relative;
+        }
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        .tooltip-text {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(17, 24, 39, 0.9);
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            width: 200px;
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen p-8">
+    <div class="max-w-7xl mx-auto space-y-8 animate-fadeIn">
+        <!-- Header -->
+        <div class="text-center space-y-2">
+            <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent animate-pulse">
+                Maximal Clique Analysis
+            </h1>
+            <p class="text-gray-600">Comparative study of Maximal clique enumeration algorithms</p>
+        </div>
+
+        <!-- Introduction -->
+        <div class="text-center mb-8">
+            <p class="text-gray-700 max-w-2xl mx-auto">
+                This report presents a comparative analysis of three maximal clique enumeration algorithms: Tomita et al., Bron–Kerbosch, and Chiba–Nishizeki. We evaluate their performance on three datasets—Wiki-vote, Email-Enron, and Skitter-as—focusing on execution time and clique distribution.
+            </p>
+        </div>
+
+        <!-- Key Metrics Grid -->
+        <div class="grid md:grid-cols-3 gap-6">
+            <div class="chart-card hover-scale p-6 rounded-xl shadow-lg border border-gray-200 animate-slideInLeft">
+                <div class="flex items-center gap-2 mb-4">
+                    <i class="fas fa-users text-blue-600 text-2xl"></i>
+                    <h3 class="text-lg font-semibold">Largest Maximal Clique Size</h3>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex justify-between text-sm">
+                        <span>Wiki-vote:</span>
+                        <span class="font-medium text-blue-600">17</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span>Email-Enron:</span>
+                        <span class="font-medium text-blue-600">20</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span>as-Skitter:</span>
+                        <span class="font-medium text-blue-600">67</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-card hover-scale p-6 rounded-xl shadow-lg border border-gray-200 animate-fadeIn">
+                <div class="flex items-center gap-2 mb-4">
+                    <i class="fas fa-list-ul text-purple-600 text-2xl"></i>
+                    <h3 class="text-lg font-semibold">Total Maximal Cliques</h3>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex justify-between text-sm">
+                        <span>Wiki-vote:</span>
+                        <span class="font-medium text-purple-600">459,002</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span>Email-Enron:</span>
+                        <span class="font-medium text-purple-600">226,859</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span>as-Skitter:</span>
+                        <span class="font-medium text-purple-600">37.3M</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-card hover-scale p-6 rounded-xl shadow-lg border border-gray-200 animate-slideInRight">
+                <div class="flex items-center gap-2 mb-4">
+                    <i class="fas fa-stopwatch text-green-600 text-2xl"></i>
+                    <h3 class="text-lg font-semibold">Fastest Execution</h3>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex justify-between text-sm">
+                        <span>Wiki-vote:</span>
+                        <span class="font-medium text-green-600">Tomita et al. (2.44s)</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span>Email-Enron:</span>
+                        <span class="font-medium text-green-600">Tomita et al. (3.06s)</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span>as-Skitter:</span>
+                        <span class="font-medium text-green-600">Tomita et al. (1h 31m)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- Time Comparison Section -->
+        <div class="text-center mb-4">
+            <h2 class="text-2xl font-semibold text-gray-800">Algorithm Performance Comparison</h2>
+        </div>
+        <div class="chart-card hover-scale p-6 rounded-xl shadow-lg border border-gray-200">
+            <h2 class="text-xl font-semibold mb-4">Execution Time Comparison</h2>
+            <canvas id="timeChart"></canvas>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- Distribution Section -->
+        <div class="text-center mb-4">
+            <h2 class="text-2xl font-semibold text-gray-800">Maximal Clique Size Distributions</h2>
+            <div class="flex justify-center mt-4 space-x-4" id="tab-buttons">
+                <button class="tab-button active" data-target="tab-wiki">Wiki-vote</button>
+                <button class="tab-button" data-target="tab-enron">Email-Enron</button>
+                <button class="tab-button" data-target="tab-skitter">as-Skitter</button>
+            </div>
+        </div>
+
+        <div class="tab-content">
+            <div id="tab-wiki" class="chart-card hover-scale p-6 rounded-xl shadow-lg border border-gray-200 animate-fadeIn">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">Wiki-vote Distribution</h3>
+                    <div class="tooltip">
+                        <i class="fas fa-info-circle text-blue-500"></i>
+                        <span class="tooltip-text">Distribution of maximal clique sizes in the Wiki-vote dataset</span>
+                    </div>
+                </div>
+                <canvas id="dist1"></canvas>
+            </div>
+            
+            <div id="tab-enron" class="chart-card hover-scale p-6 rounded-xl shadow-lg border border-gray-200 animate-fadeIn hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">Email-Enron Distribution</h3>
+                    <div class="tooltip">
+                        <i class="fas fa-info-circle text-blue-500"></i>
+                        <span class="tooltip-text">Distribution of maximal clique sizes in the Email-Enron dataset</span>
+                    </div>
+                </div>
+                <canvas id="dist2"></canvas>
+            </div>
+            
+            <div id="tab-skitter" class="chart-card hover-scale p-6 rounded-xl shadow-lg border border-gray-200 animate-fadeIn hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">as-Skitter Distribution</h3>
+                    <div class="tooltip">
+                        <i class="fas fa-info-circle text-blue-500"></i>
+                        <span class="tooltip-text">Distribution of maximal clique sizes in the as-Skitter dataset</span>
+                    </div>
+                </div>
+                <canvas id="dist3"></canvas>
+            </div>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-6 mt-8">
+            <div class="chart-card hover-scale p-6 rounded-xl shadow-lg border border-gray-200">
+                <div class="flex items-center justify-center mb-4">
+                    <i class="fas fa-chart-line text-blue-600 text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-center mb-2">Data Insights</h3>
+                <p class="text-gray-600 text-sm">The as-Skitter dataset shows the most complex clique structure with maximal clique sizes up to 67, indicating dense connectivity patterns.</p>
+            </div>
+            
+            <div class="chart-card hover-scale p-6 rounded-xl shadow-lg border border-gray-200">
+                <div class="flex items-center justify-center mb-4">
+                    <i class="fas fa-lightbulb text-yellow-500 text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-center mb-2">Algorithm Efficiency</h3>
+                <p class="text-gray-600 text-sm">The Tomita et al. algorithm consistently outperforms others across all datasets, with the Chiba–Nishizeki algorithm struggling with larger networks.</p>
+            </div>
+            
+            <div class="chart-card hover-scale p-6 rounded-xl shadow-lg border border-gray-200">
+                <div class="flex items-center justify-center mb-4">
+                    <i class="fas fa-network-wired text-purple-600 text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-center mb-2">Network Properties</h3>
+                <p class="text-gray-600 text-sm">Different distribution patterns reflect varying social structures across the three networks, with as-Skitter showing the most heterogeneous community sizes.</p>
+            </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- Footer Links -->
+        <div class="chart-card hover-scale p-6 rounded-xl shadow-lg border border-gray-200 text-center space-y-4">
+            <h3 class="text-lg font-semibold">Project Links</h3>
+            <div class="flex justify-center gap-4">
+                <a href="#" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+                    <i class="fas fa-file-alt"></i> Comprehensive Report
+                </a>
+                <a href="https://drive.google.com/drive/folders/1YkeobujsqHBzTg_nAm0RpNCYcghTPkEV?usp=sharing" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
+                    <i class="fas fa-database"></i> Source Files
+                </a>
+            </div>
+        </div>
+
+        <!-- Back to Top Button -->
+        <button id="backToTop" class="fixed bottom-4 right-4 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors">
+            <i class="fas fa-arrow-up"></i>
+        </button>
+    </div>
+
+    <script>
+        // Time Formatting Function
+        function formatTime(value) {
+            if (value < 60) {
+                return `${value.toFixed(2)}s`;
+            } else if (value < 3600) {
+                return `${(value / 60).toFixed(2)}m`;
+            } else {
+                const hours = Math.floor(value / 3600);
+                const remaining_seconds = value % 3600;
+                const minutes = Math.floor(remaining_seconds / 60);
+                return `${hours}h ${minutes}m`;
+            }
+        }
+
+        // Time Comparison Chart
+        new Chart(document.getElementById('timeChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Wiki-vote', 'Email-Enron', 'as-Skitter'],
+                datasets: [
+                    { label: 'Tomita et al.', data: [2.44, 3.06, 5506.82], backgroundColor: '#3b82f6' },
+                    { label: 'Bron–Kerbosch Algorithm', data: [5.80, 7.11, 20846.37], backgroundColor: '#8b5cf6' },
+                    { label: 'Chiba–Nishizeki Algorithm', data: [491.19, 3224.33, null], backgroundColor: '#10b981' }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: { 
+                    legend: { position: 'top' },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        formatter: (value) => value ? formatTime(value) : 'N/A',
+                        color: '#374151',
+                        font: { weight: 'bold' }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => {
+                                const value = context.raw;
+                                if (value === null || value === undefined) {
+                                    return `${context.dataset.label}: N/A`;
+                                }
+                                const formatted = formatTime(value);
+                                return `${context.dataset.label}: ${formatted} (${value.toFixed(2)}s)`;
+                            }
+                        }
+                    }
+                },
+                scales: { 
+                    y: { 
+                        title: { display: true, text: 'Time' },
+                        ticks: { callback: (value) => formatTime(value) }
+                    } 
+                },
+                animation: { duration: 1000, easing: 'easeOutQuart' }
+            },
+            plugins: [ChartDataLabels]
+        });
+
+        // Histogram Creator Function
+        const createHistogram = (id, labels, data) => {
+            new Chart(document.getElementById(id), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Maximal Clique Count',
+                        data: data,
+                        backgroundColor: '#3b82f6',
+                        borderColor: '#1d4ed8',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    return `Clique Size: ${context.label}, Count: ${context.raw}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, title: { display: true, text: 'Count' } },
+                        x: { title: { display: true, text: 'Maximal Clique Size' } }
+                    },
+                    animation: { duration: 1000, easing: 'easeOutQuart' }
+                }
+            });
+        };
+
+        // Wiki-vote Data
+        const g1Labels = [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17];
+        const g1Data = [8657,13716,27292,48416,68872,83266,76732,54456,35470,21736,11640,5449,2329,740,208,23];
+        createHistogram('dist1', g1Labels, g1Data);
+
+        // Email-Enron Data
+        const g2Labels = [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
+        const g2Data = [14070,7077,13319,18143,22715,25896,24766,22884,21393,17833,15181,11487,7417,3157,1178,286,41,10,6];
+        createHistogram('dist2', g2Labels, g2Data);
+
+        // as-Skitter Data
+        const g3Labels = Array.from({length: 66}, (_, i) => i + 2);
+        const g3Data = [
+            2319806, 3171609, 1823321, 939336, 684873, 598284, 588889, 608937, 665661, 728098,
+            798073, 877282, 945194, 980831, 939987, 839330, 729601, 639413, 600192, 611976,
+            640890, 673924, 706753, 753633, 818353, 892719, 955212, 999860, 1034106, 1017560,
+            1055653, 946717, 878552, 809485, 744634, 663650, 583922, 520239, 474301, 420796,
+            367879, 321829, 275995, 222461, 158352, 99522, 62437, 39822, 30011, 25637,
+            17707, 9514, 3737, 2042, 1080, 546, 449, 447, 405, 283,
+            242, 146, 84, 49, 22, 4
+        ];
+        createHistogram('dist3', g3Labels, g3Data);
+
+        // Tab Switching
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons
+                document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                // Add active class to clicked button
+                button.classList.add('active');
+                
+                // Hide all tab content
+                document.querySelectorAll('.tab-content > div').forEach(tab => tab.classList.add('hidden'));
+                // Show selected tab content
+                document.getElementById(button.dataset.target).classList.remove('hidden');
+            });
+        });
+
+        // Back to Top Functionality
+        document.getElementById('backToTop').addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Animate elements as they come into view
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fadeIn');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.chart-card').forEach(card => {
+            if (!card.classList.contains('animate-slideInLeft') && 
+                !card.classList.contains('animate-slideInRight') &&
+                !card.classList.contains('animate-fadeIn')) {
+                observer.observe(card);
+            }
+        });
+    </script>
+</body>
+</html>
