@@ -1,12 +1,12 @@
 # Group Members
 
-| Name         | ID Number                |
-|-----------------|-----------------------|
-| PIYUSH JAJRA       | 2021B4A72969H      |
-| PRAKSHAAL VORA     | 2021B3A72967H      |
-| TANMAY AGARWAL     | 2021B3A73040H      |
-| KUSH DESAI         | 2021B4A73158H      |
-| JAI GUPTA         | 2021B5A73169H       |
+| Name         | ID Number                | Contribution |
+|-----------------|-----------------------|-------------|
+| PIYUSH JAJRA       | 2021B4A72969H      | Implementation of Tomita's algorithm, Bron-Kerbosch's algorithm and Arboricity's algorithm |
+| PRAKSHAAL VORA     | 2021B3A72967H      |Website building, Data Preprocessing and Report. 
+| TANMAY AGARWAL     | 2021B3A73040H      |Implementation of Tomita's algorithm, Bron-Kerbosch's algorithm and Arboricity's algorithm |
+| KUSH DESAI         | 2021B4A73158H      |Implementation of Tomita's algorithm, Bron-Kerbosch's algorithm and Arboricity's algorithm |
+| JAI GUPTA         | 2021B5A73169H       |Website building, Data Preprocessing and Report. 
 
 ---
 <br>
