@@ -27,7 +27,7 @@ Ensure your system has the following:
 
 ## Compilation and Execution
 
-In all the below commands, make sure to replace the `<input_file>` with the file name of the datasets as specified below:
+In all the below commands, make sure to **REPLACE** the `<input_file>` with the file name of the datasets as specified below:
 
 | Dataset         | File Name                 |
 |-----------------|---------------------------|
