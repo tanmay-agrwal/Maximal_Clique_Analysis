@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,9 +8,153 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
-        body { font-family: 'Inter', sans-serif; }
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #f1f5f9;
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --accent-primary: #4f46e5;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --card-border: #e5e7eb;
+            --blue-accent: #3b82f6;
+            --purple-accent: #8b5cf6;
+            --green-accent: #10b981;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+            overflow-y: auto;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            min-height: 100vh;
+        }
+        
+        .gradient-bg { 
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            position: relative;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+        
+        .gradient-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(79, 70, 229, 0.1) 0%, transparent 50%);
+            animation: pulse 8s infinite;
+        }
+        
+        .chart-card { 
+            backdrop-filter: blur(12px);
+            background: var(--card-bg);
+            border-color: var(--card-border);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+        .chart-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .floating-card {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .glow {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        @keyframes glow {
+            from { box-shadow: 0 0 5px #4f46e5, 0 0 10px #4f46e5, 0 0 15px #4f46e5; }
+            to { box-shadow: 0 0 10px #4f46e5, 0 0 20px #4f46e5, 0 0 30px #4f46e5; }
+        }
+        .progress-bar {
+            width: 0;
+            height: 4px;
+            background: var(--accent-primary);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            transition: width 0.3s ease;
+        }
+        .interactive-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .interactive-card:hover {
+            transform: scale(1.02);
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            background-color: rgba(17, 24, 39, 0.95);
+            color: #fff;
+            text-align: center;
+            padding: 8px 12px;
+            border-radius: 6px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            width: max-content;
+            max-width: 200px;
+            font-size: 0.875rem;
+        }
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        .nav-link {
+            position: relative;
+            padding: 0.5rem 1rem;
+            color: var(--accent-primary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--accent-primary);
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #4f46e5;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #4338ca;
+        }
         .gradient-bg { background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); }
         .chart-card { backdrop-filter: blur(12px); background: rgba(255, 255, 255, 0.9); }
         .hover-scale { transition: transform 0.2s ease; }
@@ -53,54 +197,69 @@
             transition: all 0.3s ease;
         }
         .tab-button.active {
-            background-color: #4f46e5;
+            background-color: var(--accent-primary);
             color: white;
         }
-        .tooltip {
-            position: relative;
+        .text-gray-600 {
+            color: var(--text-secondary);
         }
-        .tooltip:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
+        .bg-white\/90 {
+            background: var(--card-bg);
         }
-        .tooltip-text {
-            visibility: hidden;
-            opacity: 0;
-            transition: opacity 0.3s;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(17, 24, 39, 0.9);
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 8px;
-            width: 200px;
+        /* Styles for modal in dark mode */
+        #modal .bg-white {
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+            border-color: var(--card-border);
+        }
+        /* Fixed hover background for theme toggle */
+        html.dark .hover\:bg-gray-100:hover {
+            background-color: rgba(255, 255, 255, 0.1);
         }
     </style>
 </head>
-<body class="gradient-bg min-h-screen p-8">
-    <div class="max-w-7xl mx-auto space-y-8 animate-fadeIn">
-        <!-- Header -->
-        <div class="text-center space-y-2">
-            <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent animate-pulse">
+<body class="gradient-bg min-h-screen">
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- Navigation Menu -->
+    <nav class="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md shadow-sm z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex space-x-8 items-center">
+                    <a href="#" class="nav-link">Overview</a>
+                    <a href="#performance" class="nav-link">Performance</a>
+                    <a href="#distribution" class="nav-link">Distribution</a>
+                    <a href="#insights" class="nav-link">Insights</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="fullscreenToggle" class="p-2 rounded-full hover:bg-gray-100">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto space-y-8 pt-20 px-4 sm:px-6 lg:px-8">
+        <!-- Header with Particle Effect -->
+        <div class="relative text-center space-y-4 py-12" data-aos="fade-down">
+            <div id="particles-js" class="absolute inset-0 pointer-events-none"></div>
+            <h1 class="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 Maximal Clique Analysis
             </h1>
-            <p class="text-gray-600">Comparative study of Maximal clique enumeration algorithms</p>
-        </div>
-
-        <!-- Introduction -->
-        <div class="text-center mb-8">
-            <p class="text-gray-700 max-w-2xl mx-auto">
-                This report presents a comparative analysis of three maximal clique enumeration algorithms: Tomita et al., Bron–Kerbosch, and Chiba–Nishizeki. We evaluate their performance on three datasets—Wiki-vote, Email-Enron, and Skitter-as—focusing on execution time and clique distribution.
+            <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+                by Group-36
+            </p>
+            <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+                A comprehensive comparative study of Maximal clique enumeration algorithms
             </p>
         </div>
 
-        <!-- Key Metrics Grid -->
-        <div class="grid md:grid-cols-3 gap-6">
-            <div class="chart-card hover-scale p-6 rounded-xl shadow-lg border border-gray-200 animate-slideInLeft">
+        <!-- Interactive Key Metrics Grid -->
+        <div class="grid md:grid-cols-3 gap-6" data-aos="fade-up">
+            <div class="chart-card p-6 rounded-xl shadow-lg border border-gray-200 interactive-card" 
+                 onclick="showMetricDetails('clique-size')">
                 <div class="flex items-center gap-2 mb-4">
                     <i class="fas fa-users text-blue-600 text-2xl"></i>
                     <h3 class="text-lg font-semibold">Largest Maximal Clique Size</h3>
@@ -166,110 +325,267 @@
 
         <div class="section-divider"></div>
 
-        <!-- Time Comparison Section -->
-        <div class="text-center mb-4">
-            <h2 class="text-2xl font-semibold text-gray-800">Algorithm Performance Comparison</h2>
-        </div>
-        <div class="chart-card hover-scale p-6 rounded-xl shadow-lg border border-gray-200">
-            <h2 class="text-xl font-semibold mb-4">Execution Time Comparison</h2>
-            <canvas id="timeChart"></canvas>
-        </div>
-
-        <div class="section-divider"></div>
-
-        <!-- Distribution Section -->
-        <div class="text-center mb-4">
-            <h2 class="text-2xl font-semibold text-gray-800">Maximal Clique Size Distributions</h2>
-            <div class="flex justify-center mt-4 space-x-4" id="tab-buttons">
-                <button class="tab-button active" data-target="tab-wiki">Wiki-vote</button>
-                <button class="tab-button" data-target="tab-enron">Email-Enron</button>
-                <button class="tab-button" data-target="tab-skitter">as-Skitter</button>
+        <!-- Performance Comparison Section -->
+        <section id="performance" class="pt-16">
+            <div class="text-center mb-8" data-aos="fade-up">
+                <h2 class="text-3xl font-bold text-gray-800">Algorithm Performance</h2>
+                <p class="text-gray-600 mt-2">Interactive comparison of execution times across datasets</p>
             </div>
-        </div>
-
-        <div class="tab-content">
-            <div id="tab-wiki" class="chart-card hover-scale p-6 rounded-xl shadow-lg border border-gray-200 animate-fadeIn">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold">Wiki-vote Distribution</h3>
-                    <div class="tooltip">
-                        <i class="fas fa-info-circle text-blue-500"></i>
-                        <span class="tooltip-text">Distribution of maximal clique sizes in the Wiki-vote dataset</span>
+            <div class="chart-card p-8 rounded-xl shadow-lg" data-aos="fade-up">
+                <div class="flex justify-between items-center mb-6">
+                    <div class="space-y-2">
+                        <h3 class="text-xl font-semibold">Execution Time Comparison</h3>
+                        <p class="text-gray-600 text-sm">Click on legend items to toggle visibility</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 rounded bg-blue-100 text-blue-600 hover:bg-blue-200" onclick="updateChartScale('linear')">Linear</button>
+                        <button class="px-3 py-1 rounded bg-blue-100 text-blue-600 hover:bg-blue-200" onclick="updateChartScale('logarithmic')">Log</button>
                     </div>
                 </div>
-                <canvas id="dist1"></canvas>
+                <canvas id="timeChart"></canvas>
             </div>
-            
-            <div id="tab-enron" class="chart-card hover-scale p-6 rounded-xl shadow-lg border border-gray-200 animate-fadeIn hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold">Email-Enron Distribution</h3>
-                    <div class="tooltip">
-                        <i class="fas fa-info-circle text-blue-500"></i>
-                        <span class="tooltip-text">Distribution of maximal clique sizes in the Email-Enron dataset</span>
+        </section>
+
+        <!-- Distribution Section with Enhanced Interactivity -->
+        <section id="distribution" class="pt-16">
+            <div class="text-center mb-8" data-aos="fade-up">
+                <h2 class="text-3xl font-bold text-gray-800">Clique Size Distribution</h2>
+                <p class="text-gray-600 mt-2">Interactive visualization of maximal clique size distributions</p>
+            </div>
+            <div class="flex justify-center space-x-4 mb-6" data-aos="fade-up">
+                <button class="tab-button active px-4 py-2 rounded-lg" data-target="tab-wiki">Wiki-vote</button>
+                <button class="tab-button px-4 py-2 rounded-lg" data-target="tab-enron">Email-Enron</button>
+                <button class="tab-button px-4 py-2 rounded-lg" data-target="tab-skitter">as-Skitter</button>
+            </div>
+            <div class="tab-content">
+                <div id="tab-wiki" class="chart-card hover-scale p-6 rounded-xl shadow-lg border border-gray-200 animate-fadeIn">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold">Wiki-vote Distribution</h3>
+                        <div class="tooltip">
+                            <i class="fas fa-info-circle text-blue-500"></i>
+                            <span class="tooltip-text">Distribution of maximal clique sizes in the Wiki-vote dataset</span>
+                        </div>
                     </div>
+                    <canvas id="dist1"></canvas>
                 </div>
-                <canvas id="dist2"></canvas>
-            </div>
-            
-            <div id="tab-skitter" class="chart-card hover-scale p-6 rounded-xl shadow-lg border border-gray-200 animate-fadeIn hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold">as-Skitter Distribution</h3>
-                    <div class="tooltip">
-                        <i class="fas fa-info-circle text-blue-500"></i>
-                        <span class="tooltip-text">Distribution of maximal clique sizes in the as-Skitter dataset</span>
+                
+                <div id="tab-enron" class="chart-card hover-scale p-6 rounded-xl shadow-lg border border-gray-200 animate-fadeIn hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold">Email-Enron Distribution</h3>
+                        <div class="tooltip">
+                            <i class="fas fa-info-circle text-blue-500"></i>
+                            <span class="tooltip-text">Distribution of maximal clique sizes in the Email-Enron dataset</span>
+                        </div>
                     </div>
+                    <canvas id="dist2"></canvas>
                 </div>
-                <canvas id="dist3"></canvas>
-            </div>
-        </div>
-
-        <div class="grid lg:grid-cols-3 gap-6 mt-8">
-            <div class="chart-card hover-scale p-6 rounded-xl shadow-lg border border-gray-200">
-                <div class="flex items-center justify-center mb-4">
-                    <i class="fas fa-chart-line text-blue-600 text-3xl"></i>
+                
+                <div id="tab-skitter" class="chart-card hover-scale p-6 rounded-xl shadow-lg border border-gray-200 animate-fadeIn hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold">as-Skitter Distribution</h3>
+                        <div class="tooltip">
+                            <i class="fas fa-info-circle text-blue-500"></i>
+                            <span class="tooltip-text">Distribution of maximal clique sizes in the as-Skitter dataset</span>
+                        </div>
+                    </div>
+                    <canvas id="dist3"></canvas>
                 </div>
-                <h3 class="text-lg font-semibold text-center mb-2">Data Insights</h3>
-                <p class="text-gray-600 text-sm">The as-Skitter dataset shows the most complex clique structure with maximal clique sizes up to 67, indicating dense connectivity patterns.</p>
             </div>
-            
-            <div class="chart-card hover-scale p-6 rounded-xl shadow-lg border border-gray-200">
-                <div class="flex items-center justify-center mb-4">
-                    <i class="fas fa-lightbulb text-yellow-500 text-3xl"></i>
+        </section>
+
+        <!-- Insights Section -->
+        <section id="insights" class="pt-16">
+            <div class="text-center mb-8" data-aos="fade-up">
+                <h2 class="text-3xl font-bold text-gray-800">Key Insights</h2>
+                <p class="text-gray-600 mt-2">Interactive exploration of our findings</p>
+            </div>
+            <div class="grid lg:grid-cols-3 gap-6" data-aos="fade-up">
+                <div class="chart-card hover-scale p-6 rounded-xl shadow-lg border border-gray-200">
+                    <div class="flex items-center justify-center mb-4">
+                        <i class="fas fa-chart-line text-blue-600 text-3xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-center mb-2">Data Insights</h3>
+                    <p class="text-gray-600 text-sm">The as-Skitter dataset shows the most complex clique structure with maximal clique sizes up to 67, indicating dense connectivity patterns.</p>
                 </div>
-                <h3 class="text-lg font-semibold text-center mb-2">Algorithm Efficiency</h3>
-                <p class="text-gray-600 text-sm">The Tomita et al. algorithm consistently outperforms others across all datasets, with the Chiba–Nishizeki algorithm struggling with larger networks.</p>
-            </div>
-            
-            <div class="chart-card hover-scale p-6 rounded-xl shadow-lg border border-gray-200">
-                <div class="flex items-center justify-center mb-4">
-                    <i class="fas fa-network-wired text-purple-600 text-3xl"></i>
+                
+                <div class="chart-card hover-scale p-6 rounded-xl shadow-lg border border-gray-200">
+                    <div class="flex items-center justify-center mb-4">
+                        <i class="fas fa-lightbulb text-yellow-500 text-3xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-center mb-2">Algorithm Efficiency</h3>
+                    <p class="text-gray-600 text-sm">The Tomita et al. algorithm consistently outperforms others across all datasets, with the Chiba–Nishizeki algorithm struggling with larger networks.</p>
                 </div>
-                <h3 class="text-lg font-semibold text-center mb-2">Network Properties</h3>
-                <p class="text-gray-600 text-sm">Different distribution patterns reflect varying social structures across the three networks, with as-Skitter showing the most heterogeneous community sizes.</p>
+                
+                <div class="chart-card hover-scale p-6 rounded-xl shadow-lg border border-gray-200">
+                    <div class="flex items-center justify-center mb-4">
+                        <i class="fas fa-network-wired text-purple-600 text-3xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-center mb-2">Network Properties</h3>
+                    <p class="text-gray-600 text-sm">Different distribution patterns reflect varying social structures across the three networks, with as-Skitter showing the most heterogeneous community sizes.</p>
+                </div>
             </div>
-        </div>
+        </section>
 
-        <div class="section-divider"></div>
-
-        <!-- Footer Links -->
-        <div class="chart-card hover-scale p-6 rounded-xl shadow-lg border border-gray-200 text-center space-y-4">
-            <h3 class="text-lg font-semibold">Project Links</h3>
-            <div class="flex justify-center gap-4">
-                <a href="#" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
-                    <i class="fas fa-file-alt"></i> Comprehensive Report
-                </a>
-                <a href="https://drive.google.com/drive/folders/1YkeobujsqHBzTg_nAm0RpNCYcghTPkEV?usp=sharing" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
-                    <i class="fas fa-database"></i> Source Files
-                </a>
+        <!-- Footer with Enhanced Links -->
+        <footer class="py-12 text-center" data-aos="fade-up">
+            <div class="chart-card p-8 rounded-xl shadow-lg">
+                <h3 class="text-2xl font-bold mb-6">Project Resources</h3>
+                <div class="flex justify-center gap-6">
+                    <a href="#" class="group relative px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all">
+                        <span class="flex items-center gap-2">
+                            <i class="fas fa-file-alt"></i>
+                            <span>View Full Report</span>
+                        </span>
+                        <div class="absolute inset-0 w-full h-full transition-all duration-300 ease-out transform translate-x-0 -skew-x-12 bg-blue-500 opacity-0 group-hover:opacity-40 group-hover:translate-x-full"></div>
+                    </a>
+                    <a href="https://drive.google.com/drive/folders/1YkeobujsqHBzTg_nAm0RpNCYcghTPkEV?usp=sharing" 
+                       class="group relative px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all">
+                        <span class="flex items-center gap-2">
+                            <i class="fas fa-database"></i>
+                            <span>Access Source Files</span>
+                        </span>
+                        <div class="absolute inset-0 w-full h-full transition-all duration-300 ease-out transform translate-x-0 -skew-x-12 bg-green-500 opacity-0 group-hover:opacity-40 group-hover:translate-x-full"></div>
+                    </a>
+                </div>
             </div>
-        </div>
-
-        <!-- Back to Top Button -->
-        <button id="backToTop" class="fixed bottom-4 right-4 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors">
-            <i class="fas fa-arrow-up"></i>
-        </button>
+        </footer>
     </div>
 
+    <!-- Floating Action Button -->
+    <button id="backToTop" class="fixed bottom-4 right-4 p-4 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-all opacity-0">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Modal Template -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-2xl w-full mx-4 transition-colors duration-300">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold" id="modalTitle"></h3>
+                <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="modalContent" class="text-gray-600"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
+        // Global variable to store chart instances
+        let timeChart, dist1Chart, dist2Chart, dist3Chart;
+        
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            once: true
+        });
+
+        // Initialize Particles.js
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 80 },
+                color: { value: '#4f46e5' },
+                shape: { type: 'circle' },
+                opacity: { value: 0.5 },
+                size: { value: 3 },
+                move: {
+                    enable: true,
+                    speed: 2
+                }
+            }
+        });
+
+        // Scroll Progress
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progressBar').style.width = scrolled + '%';
+            
+            // Show/hide back to top button
+            const backToTop = document.getElementById('backToTop');
+            if (winScroll > 300) {
+                backToTop.classList.remove('opacity-0');
+            } else {
+                backToTop.classList.add('opacity-0');
+            }
+        });
+
+        // Fullscreen Toggle with better error handling
+        document.getElementById('fullscreenToggle').addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                const docEl = document.documentElement;
+                
+                const requestFullScreen = 
+                    docEl.requestFullscreen || 
+                    docEl.mozRequestFullScreen || 
+                    docEl.webkitRequestFullscreen || 
+                    docEl.msRequestFullscreen;
+                
+                if (requestFullScreen) {
+                    requestFullScreen.call(docEl)
+                        .catch(err => {
+                            console.log(`Error attempting to enable fullscreen: ${err.message}`);
+                        });
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }
+        });
+
+        // Modal Functions
+        function showModal(title, content) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('modal').classList.remove('hidden');
+            document.getElementById('modal').classList.add('flex');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.add('hidden');
+            document.getElementById('modal').classList.remove('flex');
+        }
+
+        // Metric Details
+        function showMetricDetails(metric) {
+            let title, content;
+            switch(metric) {
+                case 'clique-size':
+                    title = 'Largest Maximal Clique Size Details';
+                    content = `
+                        <div class="space-y-4">
+                            <p class="text-gray-600">Detailed breakdown of the largest maximal clique sizes found in each dataset:</p>
+                            <ul class="space-y-2">
+                                <li class="flex justify-between items-center p-2 bg-blue-50 rounded">
+                                    <span>Wiki-vote</span>
+                                    <span class="font-bold text-blue-600">17 nodes</span>
+                                </li>
+                                <li class="flex justify-between items-center p-2 bg-blue-50 rounded">
+                                    <span>Email-Enron</span>
+                                    <span class="font-bold text-blue-600">20 nodes</span>
+                                </li>
+                                <li class="flex justify-between items-center p-2 bg-blue-50 rounded">
+                                    <span>as-Skitter</span>
+                                    <span class="font-bold text-blue-600">67 nodes</span>
+                                </li>
+                            </ul>
+                            <p class="text-sm text-gray-500 mt-4">Click on each dataset for more information about the clique structure.</p>
+                        </div>
+                    `;
+                    break;
+                // Add more cases for other metrics
+            }
+            showModal(title, content);
+        }
+
         // Time Formatting Function
         function formatTime(value) {
             if (value < 60) {
@@ -284,62 +600,89 @@
             }
         }
 
+        // Chart colors
+        const chartColors = {
+            blue: '#3b82f6',
+            purple: '#8b5cf6',
+            green: '#10b981',
+            text: '#1f2937',
+            grid: 'rgba(0, 0, 0, 0.1)',
+            border: '#e5e7eb'
+        };
+
         // Time Comparison Chart
-        new Chart(document.getElementById('timeChart'), {
-            type: 'bar',
-            data: {
-                labels: ['Wiki-vote', 'Email-Enron', 'as-Skitter'],
-                datasets: [
-                    { label: 'Tomita et al.', data: [2.44, 3.06, 5506.82], backgroundColor: '#3b82f6' },
-                    { label: 'Bron–Kerbosch Algorithm', data: [5.80, 7.11, 20846.37], backgroundColor: '#8b5cf6' },
-                    { label: 'Chiba–Nishizeki Algorithm', data: [491.19, 3224.33, null], backgroundColor: '#10b981' }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: { 
-                    legend: { position: 'top' },
-                    datalabels: {
-                        anchor: 'end',
-                        align: 'top',
-                        formatter: (value) => value ? formatTime(value) : 'N/A',
-                        color: '#374151',
-                        font: { weight: 'bold' }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: (context) => {
-                                const value = context.raw;
-                                if (value === null || value === undefined) {
-                                    return `${context.dataset.label}: N/A`;
+        function initializeTimeChart() {
+            timeChart = new Chart(document.getElementById('timeChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Wiki-vote', 'Email-Enron', 'as-Skitter'],
+                    datasets: [
+                        { label: 'Tomita et al.', data: [2.44, 3.06, 5506.82], backgroundColor: chartColors.blue },
+                        { label: 'Bron–Kerbosch Algorithm', data: [5.80, 7.11, 20846.37], backgroundColor: chartColors.purple },
+                        { label: 'Chiba–Nishizeki Algorithm', data: [491.19, 3224.33, null], backgroundColor: chartColors.green }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { 
+                        legend: { 
+                            position: 'top',
+                            labels: { color: chartColors.text }
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            formatter: (value) => value ? formatTime(value) : 'N/A',
+                            color: chartColors.text,
+                            font: { weight: 'bold' }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    const value = context.raw;
+                                    if (value === null || value === undefined) {
+                                        return `${context.dataset.label}: N/A`;
+                                    }
+                                    const formatted = formatTime(value);
+                                    return `${context.dataset.label}: ${formatted} (${value.toFixed(2)}s)`;
                                 }
-                                const formatted = formatTime(value);
-                                return `${context.dataset.label}: ${formatted} (${value.toFixed(2)}s)`;
                             }
                         }
-                    }
+                    },
+                    scales: { 
+                        y: { 
+                            title: { display: true, text: 'Time', color: chartColors.text },
+                            ticks: { 
+                                color: chartColors.text,
+                                callback: (value) => formatTime(value)
+                            },
+                            grid: {
+                                color: chartColors.grid
+                            }
+                        },
+                        x: {
+                            ticks: { color: chartColors.text },
+                            grid: { color: chartColors.grid }
+                        }
+                    },
+                    animation: { duration: 1000, easing: 'easeOutQuart' }
                 },
-                scales: { 
-                    y: { 
-                        title: { display: true, text: 'Time' },
-                        ticks: { callback: (value) => formatTime(value) }
-                    } 
-                },
-                animation: { duration: 1000, easing: 'easeOutQuart' }
-            },
-            plugins: [ChartDataLabels]
-        });
+                plugins: [ChartDataLabels]
+            });
+
+            return timeChart;
+        }
 
         // Histogram Creator Function
         const createHistogram = (id, labels, data) => {
-            new Chart(document.getElementById(id), {
+            const chart = new Chart(document.getElementById(id), {
                 type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [{
                         label: 'Maximal Clique Count',
                         data: data,
-                        backgroundColor: '#3b82f6',
+                        backgroundColor: chartColors.blue,
                         borderColor: '#1d4ed8',
                         borderWidth: 1
                     }]
@@ -347,7 +690,10 @@
                 options: {
                     responsive: true,
                     plugins: { 
-                        legend: { display: false },
+                        legend: { 
+                            display: false,
+                            labels: { color: chartColors.text }
+                        },
                         tooltip: {
                             callbacks: {
                                 label: (context) => {
@@ -357,24 +703,33 @@
                         }
                     },
                     scales: {
-                        y: { beginAtZero: true, title: { display: true, text: 'Count' } },
-                        x: { title: { display: true, text: 'Maximal Clique Size' } }
+                        y: { 
+                            beginAtZero: true, 
+                            title: { display: true, text: 'Count', color: chartColors.text },
+                            ticks: { color: chartColors.text },
+                            grid: { color: chartColors.grid }
+                        },
+                        x: { 
+                            title: { display: true, text: 'Maximal Clique Size', color: chartColors.text },
+                            ticks: { color: chartColors.text },
+                            grid: { color: chartColors.grid }
+                        }
                     },
                     animation: { duration: 1000, easing: 'easeOutQuart' }
                 }
             });
+
+            return chart;
         };
 
         // Wiki-vote Data
         const g1Labels = [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17];
         const g1Data = [8657,13716,27292,48416,68872,83266,76732,54456,35470,21736,11640,5449,2329,740,208,23];
-        createHistogram('dist1', g1Labels, g1Data);
-
+        
         // Email-Enron Data
         const g2Labels = [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
         const g2Data = [14070,7077,13319,18143,22715,25896,24766,22884,21393,17833,15181,11487,7417,3157,1178,286,41,10,6];
-        createHistogram('dist2', g2Labels, g2Data);
-
+        
         // as-Skitter Data
         const g3Labels = Array.from({length: 66}, (_, i) => i + 2);
         const g3Data = [
@@ -386,7 +741,15 @@
             17707, 9514, 3737, 2042, 1080, 546, 449, 447, 405, 283,
             242, 146, 84, 49, 22, 4
         ];
-        createHistogram('dist3', g3Labels, g3Data);
+
+        // Initialize charts after page load
+        window.addEventListener('load', () => {
+            // Initialize all charts
+            timeChart = initializeTimeChart();
+            dist1Chart = createHistogram('dist1', g1Labels, g1Data);
+            dist2Chart = createHistogram('dist2', g2Labels, g2Data);
+            dist3Chart = createHistogram('dist3', g3Labels, g3Data);
+        });
 
         // Tab Switching
         document.querySelectorAll('.tab-button').forEach(button => {
@@ -402,6 +765,14 @@
                 document.getElementById(button.dataset.target).classList.remove('hidden');
             });
         });
+
+        // Enhanced Chart Interactions
+        function updateChartScale(scale) {
+            if (timeChart) {
+                timeChart.options.scales.y.type = scale;
+                timeChart.update();
+            }
+        }
 
         // Back to Top Functionality
         document.getElementById('backToTop').addEventListener('click', () => {
